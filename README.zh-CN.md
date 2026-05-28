@@ -20,8 +20,8 @@
 
 | 示例 | 展示点 |
 | --- | --- |
-| [A* 网格路径规划逐行解读](examples/a-star-path-planning/a_star_explained.html) | 算法代码 walkthrough、公式、路径规划图、PrismJS 代码复制按钮。 |
-| [LingBot-Map 论文与代码研读](examples/lingbot-map/LINGBOT_MAP_PAPER_CODE_SUMMARY.html) | 论文 + repo synthesis、模块映射、创新点、benchmark 表格、实现 caveat。 |
+| [A* 网格路径规划逐行解读](https://kbfx1234.github.io/research-report-html/examples/a-star-path-planning/a_star_explained.html) | 算法代码 walkthrough、公式、路径规划图、PrismJS 代码复制按钮。 |
+| [LingBot-Map 论文与代码研读](https://kbfx1234.github.io/research-report-html/examples/lingbot-map/LINGBOT_MAP_PAPER_CODE_SUMMARY.html) | 论文 + repo synthesis、模块映射、创新点、benchmark 表格、实现 caveat。 |
 
 预览图：
 

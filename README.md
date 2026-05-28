@@ -11,7 +11,7 @@ research communication.
 <p>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-black.svg?style=flat-square"></a>
   <a href="skills/research-report-html/SKILL.md"><img alt="Skill" src="https://img.shields.io/badge/skill-research--report--html-2457A6?style=flat-square"></a>
-  <a href="examples/a-star-path-planning/a_star_explained.html"><img alt="Examples" src="https://img.shields.io/badge/examples-2-D85F2B?style=flat-square"></a>
+  <a href="https://kbfx1234.github.io/research-report-html/#showcase"><img alt="Examples" src="https://img.shields.io/badge/examples-2-D85F2B?style=flat-square"></a>
 </p>
 
 ## What It Makes
@@ -35,8 +35,8 @@ warm editorial pages, or generic decorative web art.
 
 | Example | What it demonstrates |
 | --- | --- |
-| [A* grid path planning walkthrough](examples/a-star-path-planning/a_star_explained.html) | Code-first algorithm explanation with visual diagrams, cost function notes, and PrismJS copy buttons. |
-| [LingBot-Map paper + code reading report](examples/lingbot-map/LINGBOT_MAP_PAPER_CODE_SUMMARY.html) | Paper/repo synthesis with reading map, module mapping, innovation summary, benchmark tables, and implementation caveats. |
+| [A* grid path planning walkthrough](https://kbfx1234.github.io/research-report-html/examples/a-star-path-planning/a_star_explained.html) | Code-first algorithm explanation with visual diagrams, cost function notes, and PrismJS copy buttons. |
+| [LingBot-Map paper + code reading report](https://kbfx1234.github.io/research-report-html/examples/lingbot-map/LINGBOT_MAP_PAPER_CODE_SUMMARY.html) | Paper/repo synthesis with reading map, module mapping, innovation summary, benchmark tables, and implementation caveats. |
 
 Preview:
 
