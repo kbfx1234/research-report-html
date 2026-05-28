@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research Report HTML Skill</title>
+<style>
+:root {
+  --ink: #151515;
+  --paper: #f7f6f0;
+  --sheet: #ffffff;
+  --mist: #fbfaf5;
+  --line: rgba(20, 20, 20, 0.12);
+  --muted: rgba(20, 20, 20, 0.62);
+  --soft: rgba(20, 20, 20, 0.42);
+  --blue: #2457a6;
+  --heat: #d85f2b;
+  --gold: #d4a44e;
+  --mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+  --sans: "Inter", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.55;
+}
+a { color: inherit; text-decoration: none; }
+.container {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+}
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--line);
+  background: rgba(247, 246, 240, 0.92);
+  backdrop-filter: blur(14px);
+}
+.nav-inner {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.brand-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 14px 0 0 var(--heat), 28px 0 0 var(--gold);
+}
+.nav-links {
+  display: flex;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.nav-links a {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.54);
+}
+.hero {
+  padding: 78px 0 44px;
+  border-bottom: 1px solid var(--line);
+}
+.eyebrow {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.eyebrow::before {
+  content: "";
+  width: 24px;
+  height: 2px;
+  background: var(--blue);
+}
+h1 {
+  max-width: 910px;
+  margin: 18px 0 20px;
+  font-size: clamp(3.05rem, 5.7vw, 6.6rem);
+  line-height: 0.94;
+  letter-spacing: 0;
+  font-weight: 650;
+}
+.lede {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 18px;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+}
+.button.secondary {
+  background: transparent;
+  color: var(--ink);
+}
+.section {
+  padding: 54px 0;
+  border-bottom: 1px solid var(--line);
+}
+.section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+h2 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+  font-weight: 620;
+}
+.section-note {
+  max-width: 420px;
+  margin: 0;
+  color: var(--muted);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--sheet);
+  overflow: hidden;
+}
+.preview {
+  min-height: 220px;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(90deg, rgba(36, 87, 166, 0.12) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(36, 87, 166, 0.12) 1px, transparent 1px),
+    var(--mist);
+  background-size: 34px 34px;
+  position: relative;
+}
+.preview::before,
+.preview::after {
+  content: "";
+  position: absolute;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.9);
+}
+.preview::before {
+  left: 28px;
+  right: 28px;
+  top: 28px;
+  height: 54px;
+}
+.preview::after {
+  left: 28px;
+  top: 102px;
+  width: 54%;
+  height: 82px;
+}
+.preview .trace {
+  position: absolute;
+  right: 34px;
+  bottom: 34px;
+  width: 34%;
+  height: 96px;
+  border-left: 4px solid var(--heat);
+  background: rgba(36, 87, 166, 0.08);
+}
+.preview.lingbot {
+  background:
+    radial-gradient(circle at 70% 35%, rgba(216, 95, 43, 0.13), transparent 28%),
+    linear-gradient(90deg, rgba(36, 87, 166, 0.12) 1px, transparent 1px),
+    var(--mist);
+  background-size: auto, 28px 28px, auto;
+}
+.card-body {
+  padding: 20px;
+}
+.meta {
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+h3 {
+  margin: 8px 0 8px;
+  font-size: 22px;
+  line-height: 1.16;
+}
+.card p {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.links a,
+.code {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 7px 9px;
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--mist);
+}
+.install {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+pre {
+  overflow-x: auto;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: #111111;
+  color: #f7f6f0;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.prompt-list {
+  display: grid;
+  gap: 10px;
+}
+.prompt {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--sheet);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.foot {
+  padding: 28px 0;
+  color: var(--soft);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+@media (max-width: 760px) {
+  .nav-links { display: none; }
+  .hero { padding-top: 52px; }
+  h1 { font-size: 3rem; }
+  .section-head,
+  .grid,
+  .install {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="#"><span class="brand-dot"></span><span>Research Report HTML</span></a>
+    <div class="nav-links">
+      <a href="#showcase">Showcase</a>
+      <a href="#install">Install</a>
+      <a href="#prompts">Prompts</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Codex + Claude Code Skill</div>
+    <h1>Research reports that read like designed technical instruments.</h1>
+    <p class="lede">Generate light, dense, single-file HTML for papers, code walkthroughs, surveys, reading maps, and technical study guides. Robotics remains a first-class example, but the skill is broader now.</p>
+    <div class="hero-actions">
+      <a class="button" href="skills/research-report-html/SKILL.md">View Skill</a>
+      <a class="button secondary" href="#install">Install</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section" id="showcase">
+    <div class="container">
+      <div class="section-head">
+        <h2>Showcase</h2>
+        <p class="section-note">Two real outputs: one code-first algorithm walkthrough, one paper and repo synthesis report.</p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="preview"><span class="trace"></span></div>
+          <div class="card-body">
+            <div class="meta">Code Walkthrough</div>
+            <h3>A* grid path planning</h3>
+            <p>Step-by-step algorithm report with cost functions, grid discretization, motion model diagrams, and copyable Python snippets.</p>
+            <div class="links">
+              <a href="examples/a-star-path-planning/a_star_explained.html">Open HTML</a>
+            </div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="preview lingbot"><span class="trace"></span></div>
+          <div class="card-body">
+            <div class="meta">Paper + Repo Report</div>
+            <h3>LingBot-Map reading summary</h3>
+            <p>A compact research map covering GCA, KV cache design, module correspondence, experimental results, and implementation notes.</p>
+            <div class="links">
+              <a href="examples/lingbot-map/LINGBOT_MAP_PAPER_CODE_SUMMARY.html">Open HTML</a>
+              <a href="examples/lingbot-map/LINGBOT_MAP_PAPER_CODE_SUMMARY.md">Read Markdown</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="install">
+    <div class="container">
+      <div class="section-head">
+        <h2>Install</h2>
+        <p class="section-note">The same skill folder works in Codex and Claude Code.</p>
+      </div>
+      <div class="install">
+        <pre><code>In Codex, ask:
+$skill-installer install https://github.com/kbfx1234/research-report-html/tree/main/skills/research-report-html</code></pre>
+        <pre><code>git clone https://github.com/kbfx1234/research-report-html.git
+cd research-report-html
+bash scripts/install.sh --target both</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="prompts">
+    <div class="container">
+      <div class="section-head">
+        <h2>Prompts</h2>
+        <p class="section-note">Use natural language; the frontmatter is tuned to trigger for research, paper, and code-report tasks.</p>
+      </div>
+      <div class="prompt-list">
+        <div class="prompt">Use research-report-html to turn this Markdown paper summary into a compact HTML reading map with implementation caveats and benchmark tables.</div>
+        <div class="prompt">Generate a single-file HTML code walkthrough for this path-planning module. Explain the main loop, data structures, edge cases, and final path reconstruction.</div>
+        <div class="prompt">Create a research survey HTML page from these paper notes. Use a chronological timeline, contribution taxonomy, and visible paper links.</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="container">MIT license · v0.1.0 direct skill-folder release</div>
+</footer>
+</body>
+</html>

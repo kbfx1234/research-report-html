@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>LingBot-Map — 论文与代码研读总结</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ── Design Tokens ── */
+:root {
+  --figure-black: #111111;
+  --heading-main: #171717;
+  --figure-white: #F7F6F0;
+  --surface-white: #FFFFFF;
+  --surface-mist: #FBFAF5;
+  --surface-stone: #E4E1D7;
+  --text-main: #202020;
+  --text-muted: rgba(28,28,28,0.66);
+  --text-soft: rgba(28,28,28,0.44);
+  --line-soft: rgba(17,17,17,0.1);
+  --line-strong: rgba(17,17,17,0.22);
+  --accent-blue: #2457A6;
+  --surface-blue: #EFF4FA;
+  --accent-heat: #D85F2B;
+  --font-display: "Space Grotesk","Inter",sans-serif;
+  --font-sans: "Inter","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --font-mono: "JetBrains Mono","SFMono-Regular","Menlo","Consolas",monospace;
+}
+
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+html,body{max-width:100%;overflow-x:hidden}
+body{
+  background:var(--figure-white);
+  color:var(--text-main);
+  font-family:var(--font-sans);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+code{white-space:normal;overflow-wrap:anywhere}
+
+/* ── Layout ── */
+.container{
+  width:calc(100% - 32px);
+  max-width:1120px;
+  margin:0 auto;
+  min-width:0;
+}
+
+/* ── Sticky Nav ── */
+.nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:rgba(247,246,240,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line-soft);
+}
+.nav-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:0 16px;
+  height:52px;
+}
+.nav-title{
+  font-family:var(--font-mono);
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--text-main);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.nav-links{
+  display:flex;
+  gap:4px;
+  flex-shrink:0;
+}
+.nav-link{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  font-weight:500;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--text-muted);
+  padding:4px 9px;
+  border-radius:4px;
+  transition:color 0.18s,background 0.18s;
+}
+.nav-link:hover{color:var(--text-main);background:var(--line-soft)}
+
+/* ── Report Hero ── */
+.report-hero{
+  padding:68px 0 52px;
+  border-bottom:1px solid var(--line-soft);
+}
+.hero-eyebrow{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  color:var(--accent-blue);
+  margin-bottom:20px;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+.hero-eyebrow-dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--accent-blue);
+  animation:pulse 2.4s ease-in-out infinite;
+  flex:0 0 auto;
+}
+.hero-eyebrow-text{flex:1 1 0;min-width:0;overflow-wrap:anywhere}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@media(prefers-reduced-motion:reduce){.hero-eyebrow-dot{animation:none}}
+
+.hero-title{
+  font-family:var(--font-display);
+  font-size:clamp(2.8rem,4.65vw,5.2rem);
+  font-weight:500;
+  line-height:0.98;
+  letter-spacing:0;
+  color:var(--heading-main);
+  max-width:820px;
+  margin-bottom:20px;
+}
+.hero-title em{
+  font-style:normal;
+  color:var(--accent-blue);
+}
+.hero-subtitle{
+  font-size:16px;
+  line-height:1.65;
+  color:var(--text-muted);
+  max-width:660px;
+  margin-bottom:36px;
+  overflow-wrap:anywhere;
+}
+
+/* ── Reading Map Card ── */
+.reading-map{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  max-width:900px;
+}
+.map-card{
+  min-width:0;
+  background:var(--surface-white);
+  border:1px solid var(--line-soft);
+  border-radius:8px;
+  padding:18px 20px;
+  transition:transform 0.18s,border-color 0.18s;
+}
+.map-card:hover{transform:translateY(-2px);border-color:var(--line-strong)}
+.map-card-label{
+  font-family:var(--font-mono);
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--accent-blue);
+  margin-bottom:6px;
+}
+.map-card-title{
+  font-family:var(--font-display);
+  font-size:15px;
+  font-weight:600;
+  color:var(--heading-main);
+  margin-bottom:4px;
+  overflow-wrap:anywhere;
+}
+.map-card-body{
+  font-size:13px;
+  line-height:1.55;
+  color:var(--text-muted);
+  overflow-wrap:anywhere;
+}
+@media(max-width:640px){.reading-map{grid-template-columns:1fr}}
+
+/* ── Section Common ── */
+.section{
+  padding:64px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.section:last-child{border-bottom:none}
+.section-label{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  font-weight:600;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--text-soft);
+  margin-bottom:8px;
+}
+.section-title{
+  font-family:var(--font-display);
+  font-size:clamp(1.9rem,2.8vw,3.35rem);
+  font-weight:500;
+  line-height:1.1;
+  letter-spacing:0;
+  color:var(--heading-main);
+  margin-bottom:32px;
+}
+.section-lead{
+  font-size:16px;
+  line-height:1.65;
+  color:var(--text-muted);
+  max-width:740px;
+  margin-bottom:32px;
+  overflow-wrap:anywhere;
+}
+
+/* ── Module Grid ── */
+.module-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:12px;
+}
+.module-card{
+  min-width:0;
+  background:var(--surface-white);
+  border:1px solid var(--line-soft);
+  border-radius:8px;
+  padding:20px 22px;
+  transition:transform 0.18s,border-color 0.18s;
+}
+.module-card:hover{transform:translateY(-2px);border-color:var(--line-strong)}
+.module-card-path{
+  font-family:var(--font-mono);
+  font-size:11px;
+  font-weight:500;
+  color:var(--accent-heat);
+  margin-bottom:6px;
+  overflow-wrap:anywhere;
+}
+.module-card-name{
+  font-family:var(--font-display);
+  font-size:14px;
+  font-weight:600;
+  color:var(--heading-main);
+  margin-bottom:5px;
+  overflow-wrap:anywhere;
+}
+.module-card-desc{
+  font-size:13px;
+  line-height:1.55;
+  color:var(--text-muted);
+  overflow-wrap:anywhere;
+}
+
+/* ── Innovations ── */
+.innovation-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.innovation-item{
+  min-width:0;
+  background:var(--surface-white);
+  border:1px solid var(--line-soft);
+  border-left:3px solid var(--accent-blue);
+  border-radius:0 8px 8px 0;
+  padding:22px 24px;
+}
+.innovation-item.heat{border-left-color:var(--accent-heat)}
+.innovation-num{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  font-weight:600;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--accent-blue);
+  margin-bottom:6px;
+}
+.innovation-item.heat .innovation-num{color:var(--accent-heat)}
+.innovation-title{
+  font-family:var(--font-display);
+  font-size:17px;
+  font-weight:600;
+  color:var(--heading-main);
+  margin-bottom:10px;
+  overflow-wrap:anywhere;
+}
+.innovation-body{
+  font-size:14.5px;
+  line-height:1.65;
+  color:var(--text-muted);
+  overflow-wrap:anywhere;
+}
+.innovation-body p{margin-bottom:8px}
+.innovation-body p:last-child{margin-bottom:0}
+
+/* ── GCA Complexity Note ── */
+.complexity-note{
+  background:var(--surface-blue);
+  border:1px solid rgba(36,87,166,0.18);
+  border-radius:8px;
+  padding:16px 20px;
+  margin-top:14px;
+  font-size:13.5px;
+  line-height:1.6;
+  color:var(--text-main);
+  overflow-wrap:anywhere;
+}
+.complexity-note code{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  background:rgba(36,87,166,0.1);
+  padding:1px 5px;
+  border-radius:3px;
+  color:var(--accent-blue);
+}
+
+/* ── Flow Steps ── */
+.flow-steps{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  counter-reset:step;
+}
+.flow-step{
+  display:grid;
+  grid-template-columns:48px 1fr;
+  gap:0 16px;
+  position:relative;
+}
+.flow-step:not(:last-child)::after{
+  content:"";
+  position:absolute;
+  left:23px;
+  top:48px;
+  bottom:0;
+  width:1px;
+  background:var(--line-soft);
+}
+.flow-step-num{
+  counter-increment:step;
+  width:40px;height:40px;
+  border-radius:50%;
+  border:1.5px solid var(--line-strong);
+  background:var(--surface-white);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--font-mono);
+  font-size:13px;
+  font-weight:600;
+  color:var(--accent-blue);
+  flex-shrink:0;
+  margin-top:4px;
+}
+.flow-step-body{
+  padding-bottom:28px;
+  min-width:0;
+}
+.flow-step-title{
+  font-family:var(--font-display);
+  font-size:15px;
+  font-weight:600;
+  color:var(--heading-main);
+  margin-bottom:5px;
+  margin-top:8px;
+}
+.flow-step-desc{
+  font-size:13.5px;
+  line-height:1.6;
+  color:var(--text-muted);
+  overflow-wrap:anywhere;
+}
+
+/* ── Benchmark Table ── */
+.table-wrap{
+  overflow-x:auto;
+  border:1px solid var(--line-soft);
+  border-radius:8px;
+  margin-bottom:20px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13.5px;
+}
+thead th{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--accent-blue);
+  background:var(--surface-blue);
+  padding:10px 14px;
+  text-align:left;
+  white-space:nowrap;
+}
+tbody tr{border-top:1px solid var(--line-soft)}
+tbody td{
+  padding:10px 14px;
+  color:var(--text-main);
+  vertical-align:middle;
+  overflow-wrap:anywhere;
+}
+tbody tr.highlight-row td{
+  background:rgba(36,87,166,0.05);
+  font-weight:600;
+  color:var(--accent-blue);
+}
+.tag-online,.tag-offline,.tag-optim{
+  display:inline-block;
+  font-family:var(--font-mono);
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:0.06em;
+  padding:2px 7px;
+  border-radius:4px;
+  text-transform:uppercase;
+}
+.tag-online{background:rgba(36,87,166,0.1);color:var(--accent-blue)}
+.tag-offline{background:rgba(28,28,28,0.07);color:var(--text-muted)}
+.tag-optim{background:rgba(216,95,43,0.1);color:var(--accent-heat)}
+
+/* ── Ablation Cards ── */
+.ablation-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:10px;
+  margin-top:8px;
+}
+.ablation-card{
+  background:var(--surface-white);
+  border:1px solid var(--line-soft);
+  border-radius:8px;
+  padding:16px 18px;
+}
+.ablation-card-label{
+  font-family:var(--font-mono);
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--text-soft);
+  margin-bottom:6px;
+}
+.ablation-stat{
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:600;
+  color:var(--accent-blue);
+  margin-bottom:2px;
+}
+.ablation-detail{
+  font-size:12px;
+  color:var(--text-muted);
+  line-height:1.5;
+}
+
+/* ── Pros / Cons ── */
+.proscons-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.pros-col,.cons-col{
+  background:var(--surface-white);
+  border:1px solid var(--line-soft);
+  border-radius:8px;
+  padding:22px 24px;
+}
+.pros-col{border-top:3px solid #2e8a57}
+.cons-col{border-top:3px solid var(--accent-heat)}
+.pc-header{
+  font-family:var(--font-display);
+  font-size:15px;
+  font-weight:600;
+  color:var(--heading-main);
+  margin-bottom:14px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.pc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pc-dot.green{background:#2e8a57}
+.pc-dot.heat{background:var(--accent-heat)}
+.pc-list{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.pc-list li{
+  font-size:13.5px;
+  line-height:1.58;
+  color:var(--text-muted);
+  padding-left:14px;
+  position:relative;
+}
+.pc-list li::before{
+  content:"—";
+  position:absolute;
+  left:0;
+  color:var(--line-strong);
+  font-size:12px;
+}
+@media(max-width:640px){.proscons-grid{grid-template-columns:1fr}}
+
+/* ── Implementation Notes ── */
+.notes-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.note-item{
+  background:var(--surface-white);
+  border:1px solid var(--line-soft);
+  border-radius:8px;
+  padding:16px 20px;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:12px;
+  align-items:start;
+}
+.note-icon{
+  font-family:var(--font-mono);
+  font-size:11px;
+  font-weight:700;
+  color:var(--accent-heat);
+  background:rgba(216,95,43,0.08);
+  border:1px solid rgba(216,95,43,0.2);
+  border-radius:4px;
+  padding:3px 8px;
+  white-space:nowrap;
+  margin-top:1px;
+}
+.note-body-title{
+  font-family:var(--font-display);
+  font-size:14px;
+  font-weight:600;
+  color:var(--heading-main);
+  margin-bottom:4px;
+}
+.note-body-text{
+  font-size:13px;
+  line-height:1.58;
+  color:var(--text-muted);
+}
+
+/* ── Recommendations ── */
+.rec-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  counter-reset:rec;
+}
+.rec-item{
+  display:grid;
+  grid-template-columns:28px 1fr;
+  gap:12px;
+  align-items:start;
+  padding:12px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.rec-item:last-child{border-bottom:none}
+.rec-n{
+  font-family:var(--font-mono);
+  font-size:12px;
+  font-weight:700;
+  color:var(--accent-blue);
+  padding-top:1px;
+}
+.rec-text{
+  font-size:14px;
+  line-height:1.6;
+  color:var(--text-muted);
+}
+.rec-text strong{color:var(--text-main);font-weight:600}
+
+/* ── Footer ── */
+.footer{
+  padding:32px 0 40px;
+  border-top:1px solid var(--line-soft);
+}
+.footer-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.footer-note{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-soft);
+  letter-spacing:0.04em;
+}
+.footer-tags{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.footer-tag{
+  font-family:var(--font-mono);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--text-soft);
+  border:1px solid var(--line-soft);
+  border-radius:4px;
+  padding:2px 7px;
+}
+
+/* ── Responsive ── */
+@media(max-width:760px){
+  .section{padding:44px 0}
+  .hero-title{font-size:2.4rem;line-height:1.05}
+  .nav-links{display:none}
+  .proscons-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .hero-title{font-size:2rem}
+  .reading-map{grid-template-columns:1fr}
+  .ablation-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav class="nav">
+  <div class="nav-inner container">
+    <span class="nav-title">LingBot-Map · 论文与代码研读</span>
+    <div class="nav-links">
+      <a class="nav-link" href="#overview">概览</a>
+      <a class="nav-link" href="#modules">模块</a>
+      <a class="nav-link" href="#innovations">创新点</a>
+      <a class="nav-link" href="#pipeline">推理流程</a>
+      <a class="nav-link" href="#benchmarks">实验结果</a>
+      <a class="nav-link" href="#vggt">vs VGGT</a>
+      <a class="nav-link" href="#notes">注意事项</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="report-hero">
+  <div class="container">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      <span class="hero-eyebrow-text">3D Vision · Streaming · SLAM-inspired Transformer</span>
+    </div>
+    <h1 class="hero-title">LingBot-<em>Map</em><br>论文与代码研读</h1>
+    <p class="hero-subtitle">
+      面向视频流的 VGGT-style 3D foundation model。将 SLAM 中 reference frame、local map、global trajectory memory 的思想变成端到端可学习的 attention/memory 结构，通过 paged KV cache 实现长序列实时推理。
+    </p>
+
+    <div class="reading-map">
+      <div class="map-card">
+        <div class="map-card-label">核心创新</div>
+        <div class="map-card-title">Geometric Context Attention (GCA)</div>
+        <div class="map-card-body">三类上下文管理历史：anchor frames、local window、trajectory memory special tokens</div>
+      </div>
+      <div class="map-card">
+        <div class="map-card-label">系统工程</div>
+        <div class="map-card-title">Paged KV Cache + FlashInfer</div>
+        <div class="map-card-body">patch pages 可回收，special pages append-only，约 20 FPS @ 1000 帧</div>
+      </div>
+      <div class="map-card">
+        <div class="map-card-label">训练策略</div>
+        <div class="map-card-title">两阶段 Progressive Training</div>
+        <div class="map-card-body">Stage 1 VGGT-style offline base → Stage 2 GCA streaming，视角数 24 → 320</div>
+      </div>
+      <div class="map-card">
+        <div class="map-card-label">关键结果</div>
+        <div class="map-card-title">Oxford Spires ATE 6.42</div>
+        <div class="map-card-body">超越 VGGT (24.78)、DA3 (12.87)、VIPE (10.52) 等离线/优化方法，在线模式下最优</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Repo Modules ── -->
+<section class="section" id="modules">
+  <div class="container">
+    <div class="section-label">Repo Structure</div>
+    <h2 class="section-title">代码模块与论文概念映射</h2>
+    <p class="section-lead">当前 repo 包含推理、demo、benchmark、可视化和预处理代码，不含完整训练代码。以下为核心模块对应关系。</p>
+
+    <div class="module-grid">
+      <div class="module-card">
+        <div class="module-card-path">lingbot_map/models/gct_stream.py</div>
+        <div class="module-card-name">GCTStream · 总模型入口</div>
+        <div class="module-card-desc">定义 streaming aggregator、causal camera head，提供 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">inference_streaming()</code> 接口</div>
+      </div>
+      <div class="module-card">
+        <div class="module-card-path">lingbot_map/aggregator/stream.py</div>
+        <div class="module-card-name">AggregatorStream · GCA 核心</div>
+        <div class="module-card-desc">streaming/causal cross-frame attention，scale token，3D RoPE，FlashInfer 或 SDPA KV cache 后端</div>
+      </div>
+      <div class="module-card">
+        <div class="module-card-path">lingbot_map/layers/flashinfer_cache.py</div>
+        <div class="module-card-name">Paged KV Cache</div>
+        <div class="module-card-desc">两流 page 设计：patch pages 可回收，special pages append-only</div>
+      </div>
+      <div class="module-card">
+        <div class="module-card-path">lingbot_map/aggregator/base.py</div>
+        <div class="module-card-name">AggregatorBase · Transformer 骨架</div>
+        <div class="module-card-desc">DINOv2 patch embedding、special tokens、2D RoPE、frame/global attention 交替调度</div>
+      </div>
+      <div class="module-card">
+        <div class="module-card-path">lingbot_map/heads/camera_head.py</div>
+        <div class="module-card-name">CameraCausalHead</div>
+        <div class="module-card-desc">从 camera token 迭代 refine 9D pose encoding：translation 3D + quaternion 4D + FoV 2D</div>
+      </div>
+      <div class="module-card">
+        <div class="module-card-path">lingbot_map/heads/dpt_head.py</div>
+        <div class="module-card-name">DPTHead · 深度/点云</div>
+        <div class="module-card-desc">DPT 风格多层 token feature 融合，输出 depth+confidence 或 point+confidence</div>
+      </div>
+      <div class="module-card">
+        <div class="module-card-path">lingbot_map/models/gct_stream_window.py</div>
+        <div class="module-card-name">Windowed / VO 模式</div>
+        <div class="module-card-desc">长序列切窗、overlap、keyframe、Sim(3) 对齐与拼接</div>
+      </div>
+      <div class="module-card">
+        <div class="module-card-path">benchmark/methods/lingbot_map.py</div>
+        <div class="module-card-name">Benchmark Adapter</div>
+        <div class="module-card-desc">输出转换为 benchmark 标准格式，支持 streaming/windowed 和 auto keyframe interval</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Innovations ── -->
+<section class="section" id="innovations">
+  <div class="container">
+    <div class="section-label">Technical Contributions</div>
+    <h2 class="section-title">四大创新点</h2>
+
+    <div class="innovation-list">
+
+      <div class="innovation-item">
+        <div class="innovation-num">Innovation 01 — Geometric Context Attention</div>
+        <div class="innovation-title">结构化历史管理：GCA 三层上下文</div>
+        <div class="innovation-body">
+          <p>传统 full attention 无法在线处理；普通 causal attention 若保留所有历史 image token 则线性增长；纯 sliding window 会丢失长期轨迹信息。GCA 把历史拆成三种粒度：</p>
+          <p>① <strong>Anchor frames</strong>（前 n 帧）：完整 token，固定世界坐标和尺度<br>
+          ② <strong>Local window</strong>（最近 k 帧）：完整 image tokens，局部相对位姿和稠密深度<br>
+          ③ <strong>Trajectory memory</strong>（更早历史）：仅保留 6 个 special tokens（camera + 4×register + scale）</p>
+          <div class="complexity-note">
+            复杂度对比：GCA 每帧上下文约 <code>(n+k)×M + 6T</code>，naive causal 为 <code>T×(M+6)</code>。<br>
+            当 M≈500 时，每个逐出帧仅新增 6 个 token，增长率低约 80×。<br>
+            示例 n=3, k=16, T=10000：causal ≈ 5×10⁶ tokens，GCA ≈ 7×10⁴ tokens。
+          </div>
+        </div>
+      </div>
+
+      <div class="innovation-item">
+        <div class="innovation-num">Innovation 02 — SLAM-like Memory，端到端学习</div>
+        <div class="innovation-title">把经典 SLAM 状态变成可学习的 Attention 结构</div>
+        <div class="innovation-body">
+          <p>reference frame → anchor（尺度和坐标 grounding）<br>
+          local map → pose-reference window（局部 dense geometry + relative pose）<br>
+          global trajectory → trajectory memory（低成本历史 context，抑制漂移）</p>
+          <p>与传统 SLAM 的核心区别：无手写特征匹配、回环检测或 BA，让 attention 学会在三类上下文间取信息，保留 feed-forward 速度和端到端训练优势。</p>
+        </div>
+      </div>
+
+      <div class="innovation-item heat">
+        <div class="innovation-num">Innovation 03 — 两阶段渐进训练</div>
+        <div class="innovation-title">Progressive View Training + Relative Pose Loss</div>
+        <div class="innovation-body">
+          <p><strong>Stage 1</strong>：VGGT-like offline base model。DINOv2 ViT-L，24层 frame+global attention，随机 2–24 views，建立通用多视图几何先验。</p>
+          <p><strong>Stage 2</strong>：global attention 替换为 GCA，从 Stage 1 权重初始化，视角数 24 → 320，local window 随机采样 16–64，context parallelism 解决显存瓶颈。</p>
+          <p>额外损失：local window 内所有帧对的 <strong>relative pose loss</strong>；使用 <strong>camera-to-world 监督</strong>（区别于 VGGT 的 world-to-camera），降低长序列旋转误差对平移估计的耦合。</p>
+        </div>
+      </div>
+
+      <div class="innovation-item">
+        <div class="innovation-num">Innovation 04 — Runtime Paged KV Cache</div>
+        <div class="innovation-title">FlashInfer 双流 Page 设计，实现实时推理</div>
+        <div class="innovation-body">
+          <p><strong>Patch pages</strong>：scale frames 的 patch pages 永久保留；recent window 超窗后回收到 free list。<br>
+          <strong>Special pages</strong>：每帧 6 个 special tokens 连续打包，append-only，不回收。<br>
+          <strong>Visible attention pages 顺序</strong>：scale patch pages → live window patch pages → all special pages。</p>
+          <p>论文报告：518×378 输入、1000 帧、window=64 下，FlashInfer ≈ 20 FPS，PyTorch contiguous KV baseline ≈ 10.5 FPS；显存 13.28 GB vs full causal 36.06 GB。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Pipeline ── -->
+<section class="section" id="pipeline">
+  <div class="container">
+    <div class="section-label">Inference Pipeline</div>
+    <h2 class="section-title">推理流程</h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;">
+      <div>
+        <p style="font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--heading-main);margin-bottom:16px;letter-spacing:0">Streaming 模式</p>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Tokenization</div>
+              <div class="flow-step-desc">DINOv2 patch embedding，每帧拼接 6 个 special tokens（camera + 4×register + scale），2D RoPE 空间编码</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Scale/Anchor Phase</div>
+              <div class="flow-step-desc">前 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">num_scale_frames</code> 帧 batch 处理，bidirectional attention，建立尺度和初始坐标</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Frame-by-frame Streaming</div>
+              <div class="flow-step-desc">逐帧处理，利用 KV cache 读取历史上下文，24 组 alternating (frame + GCA) attention</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Heads 输出</div>
+              <div class="flow-step-desc">CameraCausalHead → 9D pose；DPTHead → depth+confidence；可选 point head → world_points</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p style="font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--heading-main);margin-bottom:16px;letter-spacing:0">Windowed / VO 模式</p>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Direct Output（≤3000 帧）</div>
+              <div class="flow-step-desc">不 reset 状态，适合训练长度的若干倍，精度更高</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Window 切割</div>
+              <div class="flow-step-desc">超长视频切成重叠窗口，<code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">overlap_keyframes</code> 换算实际帧数</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Sim(3) 对齐拼接</div>
+              <div class="flow-step-desc">相邻窗口用 overlap 区域做 Sim(3) 对齐，但窗口边界会引入额外漂移</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-body">
+              <div class="flow-step-title">Keyframe 策略</div>
+              <div class="flow-step-desc">固定 keyframe_interval 或 flow-based 自适应选 keyframe（benchmark 路径支持）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px">
+      <p style="font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--heading-main);margin-bottom:14px;letter-spacing:0">网络结构参数</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>组件</th><th>参数</th><th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Backbone</td><td>ViT-L style, dim 1024</td><td>DINOv2 ViT-L/14 register 初始化</td></tr>
+            <tr><td>Patch size</td><td>14</td><td>默认 image_size=518</td></tr>
+            <tr><td>Attention layers</td><td>24 frame + 24 global</td><td>交替排布，selected outputs [4,11,17,23]</td></tr>
+            <tr><td>Attention heads</td><td>16</td><td>—</td></tr>
+            <tr><td>Special tokens / frame</td><td>6</td><td>camera(1) + register(4) + scale(1)</td></tr>
+            <tr><td>Camera head</td><td>4层 trunk + iterative refine</td><td>输出 translation 3D + quaternion 4D + FoV 2D</td></tr>
+            <tr><td>DPT head 输出</td><td>depth+conf 或 point+conf</td><td>默认开启 depth，point head 可选</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Benchmarks ── -->
+<section class="section" id="benchmarks">
+  <div class="container">
+    <div class="section-label">Experimental Results</div>
+    <h2 class="section-title">实验结论</h2>
+
+    <p class="section-lead">以下数字来自论文表格，体现方法在长序列 pose estimation 和点云重建上的系统性优势。</p>
+
+    <p style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--heading-main);margin-bottom:12px;letter-spacing:0">Oxford Spires Sparse Setting (320 帧)</p>
+    <div class="table-wrap" style="margin-bottom:32px">
+      <table>
+        <thead>
+          <tr><th>Method</th><th>Type</th><th>AUC@15 ↑</th><th>AUC@30 ↑</th><th>ATE ↓</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>VGGT</td><td><span class="tag-offline">Offline</span></td><td>23.84</td><td>35.09</td><td>24.78</td></tr>
+          <tr><td>DA3</td><td><span class="tag-offline">Offline</span></td><td>49.84</td><td>56.68</td><td>12.87</td></tr>
+          <tr><td>VIPE</td><td><span class="tag-optim">Optim</span></td><td>45.35</td><td>51.88</td><td>10.52</td></tr>
+          <tr><td>TTT3R / CUT3R</td><td><span class="tag-online">Online</span></td><td>13.92</td><td>25.90</td><td>18.16</td></tr>
+          <tr class="highlight-row"><td>LingBot-Map</td><td><span class="tag-online">Online</span></td><td>61.64</td><td>75.16</td><td>6.42</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--heading-main);margin-bottom:12px;letter-spacing:0">跨数据集泛化（Table 4）</p>
+    <div class="table-wrap" style="margin-bottom:32px">
+      <table>
+        <thead>
+          <tr><th>Dataset</th><th>Metric</th><th>LingBot-Map</th><th>Next Best</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ETH3D</td><td>ATE ↓</td><td class="highlight-row">0.22</td><td>0.86 (Wint3R)</td></tr>
+          <tr><td>7-Scenes</td><td>ATE ↓</td><td class="highlight-row">0.08</td><td>—</td></tr>
+          <tr><td>Tanks&Temples</td><td>AUC@30 ↑</td><td class="highlight-row">92.80</td><td>81.33 (Stream3R)</td></tr>
+          <tr><td>ETH3D</td><td>F1 ↑</td><td class="highlight-row">98.98</td><td>77.28 (Wint3R)</td></tr>
+          <tr><td>7-Scenes</td><td>F1 ↑</td><td class="highlight-row">80.39</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--heading-main);margin-bottom:14px;letter-spacing:0">Ablation 关键贡献（Table 6/7）</p>
+    <div class="ablation-grid">
+      <div class="ablation-card">
+        <div class="ablation-card-label">Video RoPE（最大单项）</div>
+        <div class="ablation-stat">7.46 → 5.98</div>
+        <div class="ablation-detail">ATE 下降，ablation 中最大单项提升</div>
+      </div>
+      <div class="ablation-card">
+        <div class="ablation-card-label">Relative Pose Loss</div>
+        <div class="ablation-stat">2.26 → 5.35</div>
+        <div class="ablation-detail">缺失时 RPE-rot 严重退化</div>
+      </div>
+      <div class="ablation-card">
+        <div class="ablation-card-label">Context Tokens</div>
+        <div class="ablation-stat">ATE −0.42</div>
+        <div class="ablation-detail">7.88 → 7.46，trajectory memory 有效</div>
+      </div>
+      <div class="ablation-card">
+        <div class="ablation-card-label">Window=64 vs Full Causal</div>
+        <div class="ablation-stat">20.29 FPS</div>
+        <div class="ablation-detail">vs 11.87 FPS，显存 13.28 GB vs 36.06 GB，ATE 也更低</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── vs VGGT ── -->
+<section class="section" id="vggt">
+  <div class="container">
+    <div class="section-label">Comparison</div>
+    <h2 class="section-title">相较于 VGGT 的优缺点</h2>
+
+    <div class="proscons-grid">
+      <div class="pros-col">
+        <div class="pc-header"><span class="pc-dot green"></span>优势</div>
+        <ul class="pc-list">
+          <li><strong>真正在线流式</strong>：frame-by-frame causal inference，不需要未来帧，贴近 SLAM/VO 任务定义</li>
+          <li><strong>长序列成本可控</strong>：patch page pool 固定大小，special pages 仅 6 tokens/frame，20 FPS @ 1000 帧</li>
+          <li><strong>更抗长程漂移</strong>：Oxford ATE 6.42 vs VGGT 24.78，anchor+window+memory 专为漂移控制设计</li>
+          <li><strong>更接近工程实时系统</strong>：含完整 demo、benchmark、profiling、windowed 对齐 pipeline</li>
+          <li><strong>Stage 1 checkpoint 可复用</strong>：可加载进 VGGT 做 bidirectional inference</li>
+        </ul>
+      </div>
+      <div class="cons-col">
+        <div class="pc-header"><span class="pc-dot heat"></span>局限</div>
+        <ul class="pc-list">
+          <li><strong>失去全双向 context</strong>：current frame 不能看未来帧，offline 少量 view 全局重建 VGGT 仍更优</li>
+          <li><strong>输出任务少于 VGGT</strong>：无完整 point tracks / dense track head，缺跨视角匹配特征</li>
+          <li><strong>Runtime 更复杂</strong>：依赖 FlashInfer、paged cache、keyframe、Sim(3) alignment，调试成本高</li>
+          <li><strong>Direct mode 有训练长度边界</strong>：建议 ≤3000 帧，超长需 windowed reset，边界引入 Sim(3) 误差</li>
+          <li><strong>初始 anchor 帧很关键</strong>：开头纹理差或运动退化会拖累全局坐标，VGGT 离线设置更鲁棒</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Implementation Notes ── -->
+<section class="section" id="notes">
+  <div class="container">
+    <div class="section-label">Implementation Notes</div>
+    <h2 class="section-title">代码与论文差异 / 注意事项</h2>
+
+    <div class="notes-list">
+      <div class="note-item">
+        <span class="note-icon">NOTE 01</span>
+        <div>
+          <div class="note-body-title">Adaptive Keyframe：论文描述 ≠ 默认 demo 路径</div>
+          <div class="note-body-text">论文 Sec. 4.4 描述基于 optical flow magnitude 的自适应 keyframe。实际上 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">inference_streaming()</code> 主要走固定 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">keyframe_interval</code>；flow-based 策略需走 windowed/benchmark 入口（<code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">flow_threshold &gt; 0</code>）。</div>
+        </div>
+      </div>
+      <div class="note-item">
+        <span class="note-icon">NOTE 02</span>
+        <div>
+          <div class="note-body-title">命名差异：anchor token vs scale_token</div>
+          <div class="note-body-text">论文称 learnable anchor token，代码里是 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">scale_token</code>，总 special tokens 数为 6。语义上承担 anchor/scale frame 标识和尺度初始化功能。</div>
+        </div>
+      </div>
+      <div class="note-item">
+        <span class="note-icon">NOTE 03</span>
+        <div>
+          <div class="note-body-title">训练代码缺失</div>
+          <div class="note-body-text">Repo 中无 Stage 1/Stage 2 完整训练 pipeline。Progressive view training、context parallelism、relative pose loss 的实现细节仅可从论文复述，不能逐行验证。</div>
+        </div>
+      </div>
+      <div class="note-item">
+        <span class="note-icon">⚠ POSE</span>
+        <div>
+          <div class="note-body-title">Pose Convention 需复核：C2W / W2C 注释不一致</div>
+          <div class="note-body-text"><code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">demo.py</code> 将 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">pose_encoding_to_extri_intri()</code> 输出再 inverse 一次（注释"Convert w2c to c2w"）；<code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">benchmark/methods/lingbot_map.py</code> 则直接写入（注释"C2W"）；<code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">utils/pose_enc.py</code> docstring 仍描述为 camera-from-world。接入外部系统前务必用有 GT 的短序列验证方向。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Recommendations ── -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">Reproduction Guide</div>
+    <h2 class="section-title">复现与使用建议</h2>
+
+    <div class="rec-list">
+      <div class="rec-item">
+        <span class="rec-n">01</span>
+        <span class="rec-text"><strong>先跑短序列 demo</strong>：使用 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">example/courthouse</code> 或 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">example/oxford</code>，确认 checkpoint、pose/depth 输出和可视化链路正常。</span>
+      </div>
+      <div class="rec-item">
+        <span class="rec-n">02</span>
+        <span class="rec-text"><strong>跑 benchmark adapter</strong>：<code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">benchmark/configs/oxford.yaml</code> 或 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">kitti.yaml</code>，重点验证 pose convention 方向是否正确。</span>
+      </div>
+      <div class="rec-item">
+        <span class="rec-n">03</span>
+        <span class="rec-text"><strong>对超过 320 帧的序列</strong>，比较 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">keyframe_interval=1</code>、auto interval 和 windowed mode 的轨迹稳定性与显存占用。</span>
+      </div>
+      <div class="rec-item">
+        <span class="rec-n">04</span>
+        <span class="rec-text"><strong>接入机器人系统时</strong>，优先检查 C2W/W2C 输出方向、尺度稳定性、sky/dynamic object filtering，以及是否需要外部 loop closure / BA。</span>
+      </div>
+      <div class="rec-item">
+        <span class="rec-n">05</span>
+        <span class="rec-text"><strong>复用 VGGT 能力</strong>：README 中 <code style="font-family:var(--font-mono);font-size:11.5px;background:rgba(17,17,17,0.06);padding:1px 4px;border-radius:3px">lingbot-map-stage1</code> checkpoint 可加载进 VGGT 做 bidirectional inference；Stage 2 才是 streaming GCA 特化。</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <span class="footer-note">Generated · 2026-05-25 · Based on lingbot-map paper + repo code review</span>
+      <div class="footer-tags">
+        <span class="footer-tag">3D Vision</span>
+        <span class="footer-tag">Streaming SLAM</span>
+        <span class="footer-tag">Transformer</span>
+        <span class="footer-tag">VGGT</span>
+        <span class="footer-tag">KV Cache</span>
+        <span class="footer-tag">Embodied AI</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
