@@ -25,11 +25,9 @@
 
 预览图：
 
-![A* path planning report](docs/screenshots/a-star-desktop.png)
+![Research Report HTML showcase](docs/screenshots/index-desktop.png)
 
-![LingBot-Map report](docs/screenshots/lingbot-map-mobile.png)
-
-也可以直接打开 [index.html](index.html) 看 showcase 页面。
+也可以直接打开线上 showcase：[kbfx1234.github.io/research-report-html](https://kbfx1234.github.io/research-report-html/)，或查看仓库里的 [index.html](index.html)。
 
 ## 安装到 Codex
 

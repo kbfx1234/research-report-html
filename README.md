@@ -38,13 +38,11 @@ warm editorial pages, or generic decorative web art.
 | [A* grid path planning walkthrough](examples/a-star-path-planning/a_star_explained.html) | Code-first algorithm explanation with visual diagrams, cost function notes, and PrismJS copy buttons. |
 | [LingBot-Map paper + code reading report](examples/lingbot-map/LINGBOT_MAP_PAPER_CODE_SUMMARY.html) | Paper/repo synthesis with reading map, module mapping, innovation summary, benchmark tables, and implementation caveats. |
 
-Preview images:
+Preview:
 
-![A* path planning report](docs/screenshots/a-star-desktop.png)
+![Research Report HTML showcase](docs/screenshots/index-desktop.png)
 
-![LingBot-Map report](docs/screenshots/lingbot-map-mobile.png)
-
-Open [index.html](index.html) for a small GitHub Pages-style showcase.
+Open the live showcase at [kbfx1234.github.io/research-report-html](https://kbfx1234.github.io/research-report-html/) or view [index.html](index.html) from the repo.
 
 ## Install In Codex
 
